@@ -153,19 +153,16 @@ describe("markdown-parser", function () {
          * text
          * =====
          **/
-            // TODO: 0.15 un-support. no way of supporting.
-        context.skip("SetextHeader", function () {
+        context("SetextHeader", function () {
             var AST, text, header;
             beforeEach(function () {
                 text = "string";
                 header = text + "\n======";
                 AST = parse(header);
-                console.log(inspect(AST));
             });
             context("Header", function () {
                 it("should has implemented TxtNode", function () {
                     var node = findFirstTypedNode(AST, Syntax.Header);
-                    console.log((inspect(node)));
                     shouldHaveImplementTxtNode(node, header);
                 });
             });
@@ -240,9 +237,9 @@ describe("markdown-parser", function () {
             var node, AST;
             AST = parse("- item\n" +
             "   - item2");// second line should has offset
-            node = findFirstTypedNode(AST, Syntax.ListItem, "   - item2");
+            node = findFirstTypedNode(AST, Syntax.ListItem, " - item2");
             assert(node);
-            assert.equal(node.raw, "   - item2");
+            assert.equal(node.raw, " - item2");
         });
         it("should has implemented TxtNode", function () {
             var text = "text",
@@ -273,7 +270,7 @@ describe("markdown-parser", function () {
         });
         it("should has implemented TxtNode", function () {
             var node = findFirstTypedNode(AST, Syntax.BlockQuote);
-            assert.deepEqual(node.range, [rawValue.indexOf(text), rawValue.length]);
+            assert.deepEqual(node.range, [0, rawValue.length]);
         });
     });
     /*
@@ -285,34 +282,34 @@ describe("markdown-parser", function () {
         context("IndentCodeBlock", function () {
             var AST, rawValue, code;
             beforeEach(function () {
-                code = "var code;\n";
+                code = "var code;";
                 rawValue = "    \n" +
                 "    " + code +
-                "\n";
+                "\n\n";
                 AST = parse(rawValue);
             });
             it("should has implemented TxtNode", function () {
                 var node = findFirstTypedNode(AST, Syntax.CodeBlock);
-                assert.equal(node.raw, code);
+                assert(node.raw.indexOf(code) !== -1);
                 var slicedCode = rawValue.slice(node.range[0], node.range[1]);
-                assert.equal(slicedCode, code);
+                assert.equal(slicedCode.trim(), code);
             });
         });
         context("FencedCode", function () {
             var AST, rawValue, code;
             beforeEach(function () {
-                code = "var code;\n";
+                code = "var code;";
                 rawValue = "```\n" +
                 code +
-                "```\n";
+                "\n```";
                 AST = parse(rawValue);
             });
             it("should has implemented TxtNode", function () {
                 var node = findFirstTypedNode(AST, Syntax.CodeBlock);
-                assert.equal(node.raw, code);// CodeBlock have not contain CodeBlock mark like "```"
-                // slicedCode does not contain trailing brake line.
+                var codeBlockRaw = rawValue;
+                assert.equal(node.raw, codeBlockRaw);
                 var slicedCode = rawValue.slice(node.range[0], node.range[1]);
-                assert.equal(slicedCode, code);
+                assert.equal(slicedCode, codeBlockRaw);
             });
         });
 
@@ -367,12 +364,6 @@ describe("markdown-parser", function () {
             var node = findFirstTypedNode(AST, Syntax.Image);
             shouldHaveImplementTxtNode(node, rawValue);
         });
-        context("Str", function () {
-            it("should have correct range", function () {
-                var node = findFirstTypedNode(AST, Syntax.Str);
-                shouldHaveImplementInlineTxtNode(node, labelText, rawValue)
-            });
-        });
     });
     /*
         *text*
@@ -393,6 +384,34 @@ describe("markdown-parser", function () {
                 var node = findFirstTypedNode(AST, Syntax.Str);
                 shouldHaveImplementInlineTxtNode(node, text, rawValue)
             });
+        });
+    });
+    /*
+    ----
+    */
+    context("Node type is HorizontalRule", function () {
+        var AST, rawValue;
+        beforeEach(function () {
+            rawValue = "----";
+            AST = parse(rawValue);
+        });
+        it("should has implemented TxtNode", function () {
+            var node = findFirstTypedNode(AST, Syntax.HorizontalRule);
+            shouldHaveImplementTxtNode(node, rawValue);
+        });
+    });
+    /*
+        <html>
+     */
+    context("Node type is Html", function () {
+        var AST, rawValue;
+        beforeEach(function () {
+            rawValue = "<html>text</html>";
+            AST = parse(rawValue);
+        });
+        it("should has implemented TxtNode", function () {
+            var node = findFirstTypedNode(AST, Syntax.Html);
+            shouldHaveImplementTxtNode(node, rawValue);
         });
     });
 });
