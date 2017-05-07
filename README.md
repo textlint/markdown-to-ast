@@ -1,5 +1,7 @@
 # markdown-to-ast [![Build Status](https://travis-ci.org/textlint/markdown-to-ast.svg)](https://travis-ci.org/textlint/markdown-to-ast)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/textlint/markdown-to-ast.svg)](https://greenkeeper.io/)
+
 Parse Markdown to AST with location info.
 
 This library is not parser itself, it dependent on [wooorm/remark](https://github.com/wooorm/remark).
